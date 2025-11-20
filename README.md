@@ -1,12 +1,11 @@
 # dcARCA - Facturación Electrónica Argentina
 
-**dcARCA** es una solución completa en .NET 8 para implementar facturación electrónica Argentina utilizando el web service **WSFEv1 de AFIP (ARCA)** y consultar el padrón oficial **ws_sr_padron_a5** para validar CUIT. 
+**dcARCA** es un componente .NET 8 para implementar facturación electrónica Argentina utilizando el web service **WSFEv1 de AFIP (ARCA)** y consultar el padrón oficial **ws_sr_padron_a5** para validar CUIT. 
 Esta librería NO ES un producto oficial de ARCA ni del Gobierno Argentino,sino una implementación independiente desarrollada por **DC Sistemas**. [www.diegocofre.com.ar](http://www.diegocofre.com.ar)
 
 ## Licencia
 Este proyecto está licenciado bajo **Apache License 2.0**.  
-Copyright (c) 2025 Diego Cofré, DC Sistemas  
-www.diegocofre.com.ar
+Copyright (c) 2025 Diego Cofré, DC Sistemas www.diegocofre.com.ar
 
 ## � Quick Start (5 minutos)
 
@@ -65,16 +64,6 @@ dotnet build
 
 # Ejecutar aplicación de prueba
 dotnet run --project dcArca.TestApp
-```
-
-### Como Paquete NuGet
-```powershell
-# Instalar la librería
-dotnet add package dcArca.Core
-
-# En tu código
-using dcArca.Core.Services;
-using dcArca.Core.Models;
 ```
 
 ## 🔐 Configuración del Certificado ARCA
@@ -164,6 +153,21 @@ if (resultado.Success)
 }
 ```
 
+### Nota de Crédito/Débito
+Para notas de crédito o débito, debes especificar el comprobante asociado (CbteAsociado*) para cumplir con la regla 10197 de ARCA:
+```csharp
+var nota = new dcFacturaRequest
+{
+    // ... campos básicos ...
+    TipoComprobante = dcTipoComprobante.NotaCreditoB, // 8
+    // Comprobante asociado (factura original)
+    CbteAsociadoTipo = 6, // Tipo de la factura base (FacturaB)
+    CbteAsociadoPtoVta = 1, // Punto de venta de la factura base
+    CbteAsociadoNro = 123, // Número de la factura base
+    // Opcional: CbteAsociadoFecha = "20251119"
+};
+```
+
 ### Factura de Servicios
 ```csharp
 var factura = new dcFacturaRequest
@@ -207,7 +211,10 @@ if (!resultado.Success)
 
 ### dcFacturaRequest
 - Propiedades: CuitReceptor, ImporteNeto, ImporteIva, etc.
+- Para notas: CbteAsociadoTipo, CbteAsociadoPtoVta, CbteAsociadoNro (obligatorios)
 - `ValidarCuit()`: Valida formato CUIT
+- `EsNota()`: Indica si es nota de crédito/débito
+- `CumpleReglaNotas10197()`: Valida que notas tengan comprobante asociado
 
 ## 🐛 Troubleshooting
 
@@ -228,6 +235,7 @@ if (!resultado.Success)
 ### Errores comunes ARCA
 - 10016: CUIT inválido
 - 10048: Comprobante duplicado
+- 10197: Notas de crédito/débito requieren comprobante asociado (CbteAsoc)
 - 1217: Certificado no autorizado
 
 ## 🔒 Seguridad
