@@ -1,11 +1,11 @@
 # dcARCA - Facturación Electrónica Argentina
 
 **dcARCA** es un componente .NET 8 para implementar facturación electrónica Argentina utilizando el web service **WSFEv1 de AFIP (ARCA)** y consultar el padrón oficial **ws_sr_padron_a5** para validar CUIT. 
-Esta librería NO ES un producto oficial de ARCA ni del Gobierno Argentino,sino una implementación independiente desarrollada por **DC Sistemas**. [www.diegocofre.com.ar](http://www.diegocofre.com.ar)
+Esta librería NO ES un producto oficial de ARCA ni del Gobierno Argentino,sino una implementación independiente desarrollada por **Diego Cofré Sistemas**. [www.diegocofre.com.ar](http://www.diegocofre.com.ar)
 
 ## Licencia
 Este proyecto está licenciado bajo **Apache License 2.0**.  
-Copyright (c) 2025 Diego Cofré, DC Sistemas www.diegocofre.com.ar
+Copyright (c) 2025 Diego Cofré Sistemas www.diegocofre.com.ar
 
 ## � Quick Start (5 minutos)
 
@@ -45,6 +45,12 @@ dotnet run --project dcArca.TestApp\dcArca.TestApp.csproj
 - Ingresa CUIT receptor: `20123456789`
 - Importe neto: `1000.00`
 - Clic "Calcular IVA y Total" → "Autorizar Factura"
+- Abre "Consultar Comprobante" y verificá cualquier CAE autorizado con `FECompConsultar` (nuevo en esta versión)
+
+## 🆕 Novedades de esta versión
+- Nuevo formulario **Consultar Comprobante (FECompConsultar)** dentro de la app WinForms para leer cualquier comprobante autorizado y mostrar todo el payload que devuelve AFIP (CAE, importes, tributos, fechas, IVA detallado, observaciones y eventos).
+- Traducción automática de los códigos AFIP más comunes (concepto, tipo de comprobante, tipo de documento, condición IVA y alícuotas) mediante `dcAfipEnumExtensions`, disponible tanto para la UI como para logs/servicios.
+- El modelo `dcFacturaResponse` ahora expone propiedades enriquecidas (moneda, cotización, períodos de servicio/vencimiento, IVA desglosado y condición IVA del receptor) que podés reutilizar en tus propios flujos.
 
 ## 📦 Instalación
 
@@ -202,9 +208,20 @@ if (!resultado.Success)
 
 ## 📚 API Reference
 
+### Consultar comprobante (FECompConsultar)
+
+La WinForms Test App incluye un formulario dedicado para consultar cualquier comprobante emitido desde tu CUIT:
+
+1. Ejecuta `dcArca.TestApp` y abre **"Consultar Comprobante"** desde el menú principal.
+2. Elegí el tipo de comprobante desde la lista (los textos son generados automáticamente con las nuevas extensiones de enums).
+3. Ingresá el número a consultar y presioná **Consultar**. La pantalla formatea los datos clave y muestra el detalle completo (incluye IVA por alícuota, fechas de servicio, moneda, observaciones y errores).
+4. Toda la información proviene del nuevo método `FECompConsultarAsync`, por lo que es la misma estructura que podés consumir en tus propias apps.
+
 ### dcWsfeClient
 - `FECAESolicitarAsync(dcFacturaRequest)`: Solicita CAE
 - `FECompUltimoAutorizadoAsync(dcTipoComprobante)`: Último número
+- `FECompConsultarAsync(long numeroComprobante, dcTipoComprobante tipo)`: Recupera un comprobante existente y devuelve un `dcFacturaResponse` enriquecido.
+- `GetCondicionesIVAReceptorAsync(int docTipo, long docNro, dcTipoComprobante tipo)`: Wrapper para `FEParamGetCondicionIvaReceptor` (útil para validar RG 5616).
 
 ### dcPadronClient
 - `GetPersonaAsync(long cuit)`: Consulta padrón A5
@@ -251,4 +268,4 @@ if (!resultado.Success)
 - [Padrón A5](https://www.afip.gob.ar/ws/documentacion/ws-padron-a5.asp)
 - [WSAA](https://www.afip.gob.ar/ws/WSAA/wsaa.html)
 
-**dc sistemas** http://www.diegocofre.com.ar - Soluciones en .NET
+**diego cofré sistemas** http://www.diegocofre.com.ar - Soluciones en .NET

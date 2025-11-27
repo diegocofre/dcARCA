@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Diego Cofré, DC Sistemas
+ * Copyright (c) 2025 Diego Cofré Sistemas
  * www.diegocofre.com.ar
  *
  * Licensed under the Apache License, Version 2.0.
@@ -217,7 +217,7 @@ public class dcWsfeClient : IdcWsfeClient, IDisposable
                 return CrearRespuestaValidacion("TDOC_INVALID", "TipoDocReceptor debe ser un valor válido (p. ej. 80 = CUIT).");
             }
 
-            if (!factura.ValidarCuit())
+            if (factura.TipoDocReceptor != 99 && !factura.ValidarCuit())
             {
                 return CrearRespuestaValidacion("CUIT_INVALID", "El CUIT del receptor no tiene un formato válido o dígito verificador incorrecto.");
             }

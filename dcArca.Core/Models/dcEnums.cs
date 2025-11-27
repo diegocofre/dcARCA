@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Diego Cofré, DC Sistemas
+ * Copyright (c) 2025 Diego Cofré Sistemas
  * www.diegocofre.com.ar
  *
  * Licensed under the Apache License, Version 2.0.
@@ -181,4 +181,25 @@ public enum dcTipoComprobante
     /// Nota de Crédito M
     /// </summary>
     NotaCreditoM = 53
+}
+
+/// <summary>
+/// Condiciones frente al IVA para receptores de comprobantes AFIP
+/// </summary>
+public enum dcCondicionIvaReceptor
+{
+    ResponsableInscripto = 1,
+    ResponsableNoInscripto = 2,
+    NoResponsable = 3,
+    SujetoExento = 4,
+    ConsumidorFinal = 5,
+    ResponsableMonotributo = 6,
+    SujetoNoCategorizado = 7,
+    ProveedorDelExterior = 8,
+    ClienteDelExterior = 9,
+    IVALiberado19640 = 10,
+    ResponsableInscriptoAgentePercepcion = 11,
+    PequenoContribuyenteEventual = 12,
+    MonotributistaSocial = 13,
+    PequenoContribuyenteEventualSocial = 14
 }

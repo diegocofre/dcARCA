@@ -205,7 +205,8 @@ public sealed class dcWsfeSoapBuilder
     {
         if (!string.IsNullOrWhiteSpace(factura.CondicionIvaReceptor))
         {
-            sb.AppendLine($"                        <ar:CondicionIVAReceptorId>{factura.CondicionIvaReceptor}</ar:CondicionIVAReceptorId>");
+            int id = MapearCondicionIvaAId(factura.CondicionIvaReceptor);
+            sb.AppendLine($"                        <ar:CondicionIVAReceptorId>{id}</ar:CondicionIVAReceptorId>");
         }
 
         // Comprobantes asociados (Notas de crédito/débito) - Regla 10197
@@ -236,4 +237,23 @@ public sealed class dcWsfeSoapBuilder
             sb.AppendLine("                        </ar:PeriodoAsoc>");
         }
     }
+
+    private static int MapearCondicionIvaAId(string condicion) => condicion.Trim().ToUpper() switch
+    {
+        "I" => 1,      // IVA Responsable Inscripto
+        "NI" => 2,     // IVA Responsable no Inscripto
+        "NR" => 3,     // IVA no Responsable
+        "EX" => 4,     // IVA Sujeto Exento
+        "CF" => 5,     // Consumidor Final
+        "M" => 6,      // Responsable Monotributo
+        "NC" => 7,     // Sujeto no Categorizado
+        "S" => 8,      // Proveedor del Exterior
+        "E" => 9,      // Cliente del Exterior
+        "L" => 10,     // IVA Liberado - Ley N° 19.640
+        "RI" => 11,    // IVA Responsable Inscripto - Agente de Percepción
+        "PCE" => 12,   // Pequeño Contribuyente Eventual
+        "MS" => 13,    // Monotributista Social
+        "PCES" => 14,  // Pequeño Contribuyente Eventual Social
+        _ => 0         // Desconocido
+    };
 }

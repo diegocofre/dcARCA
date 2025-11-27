@@ -1,5 +1,5 @@
-ï»¿/*
- * Copyright (c) 2025 Diego CofrÃ©, DC Sistemas
+/*
+ * Copyright (c) 2025 Diego Cofré Sistemas
  * www.diegocofre.com.ar
  *
  * Licensed under the Apache License, Version 2.0.
@@ -59,7 +59,7 @@ partial class Form1
             this.lblTitulo.Name = "lblTitulo";
             this.lblTitulo.Size = new System.Drawing.Size(351, 25);
             this.lblTitulo.TabIndex = 0;
-            this.lblTitulo.Text = "dcARCA - FacturaciÃ³n ElectrÃ³nica ARCA";
+            this.lblTitulo.Text = "dcARCA - Facturación Electrónica ARCA";
             // 
             // lblConcepto / cmbConcepto
             // 
@@ -109,7 +109,7 @@ partial class Form1
             this.lblNumeroComprobante.Location = new System.Drawing.Point(20, 185);
             this.lblNumeroComprobante.Name = "lblNumeroComprobante";
             this.lblNumeroComprobante.Size = new System.Drawing.Size(132, 17);
-            this.lblNumeroComprobante.Text = "NÃºmero de comprobante:";
+            this.lblNumeroComprobante.Text = "Número de comprobante:";
             this.txtNumeroComprobante.Location = new System.Drawing.Point(20, 205);
             this.txtNumeroComprobante.Name = "txtNumeroComprobante";
             this.txtNumeroComprobante.PlaceholderText = "1234";
@@ -119,7 +119,7 @@ partial class Form1
             this.btnProximo.Name = "btnProximo";
             this.btnProximo.Size = new System.Drawing.Size(150, 25);
             this.btnProximo.TabIndex = 5;
-            this.btnProximo.Text = "PrÃ³ximo";
+            this.btnProximo.Text = "Próximo";
             this.btnProximo.UseVisualStyleBackColor = true;
             this.btnProximo.Click += new System.EventHandler(this.btnProximo_Click);
             // 
@@ -144,7 +144,7 @@ partial class Form1
             this.lblCondicionIVA.Location = new System.Drawing.Point(420, 125);
             this.lblCondicionIVA.Name = "lblCondicionIVA";
             this.lblCondicionIVA.Size = new System.Drawing.Size(119, 17);
-            this.lblCondicionIVA.Text = "CondiciÃ³n IVA (RG5616):";
+            this.lblCondicionIVA.Text = "Condición IVA (RG5616):";
             this.cmbCondicionIVA.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbCondicionIVA.Location = new System.Drawing.Point(420, 145);
             this.cmbCondicionIVA.Name = "cmbCondicionIVA";
@@ -296,7 +296,7 @@ partial class Form1
             this.Controls.Add(this.lblTitulo);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "dcARCA - Test FacturaciÃ³n";
+            this.Text = "dcARCA - Test Facturación";
             this.ResumeLayout(false);
             this.PerformLayout();
         }

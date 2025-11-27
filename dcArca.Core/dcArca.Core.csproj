@@ -8,8 +8,8 @@
 
   <PropertyGroup>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <Authors>Diego Cofré - DC Sistemas</Authors>
-    <Company>DC Sistemas</Company>
+    <Authors>Diego Cofré Sistemas</Authors>
+    <Company>Diego Cofré Sistemas</Company>
     <PackageProjectUrl>https://www.diegocofre.com.ar</PackageProjectUrl>
   </PropertyGroup>
 

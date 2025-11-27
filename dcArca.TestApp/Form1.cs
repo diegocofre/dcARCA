@@ -334,7 +334,6 @@ public partial class Form1 : Form
 
         try
         {
-            // Crear cliente WSFEv1
             if (_wsfeClient == null)
             {
                 RefrescarClienteWsfe();

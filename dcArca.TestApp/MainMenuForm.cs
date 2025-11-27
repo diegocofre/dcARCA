@@ -19,7 +19,7 @@ public partial class MainMenuForm : Form
         this.FormBorderStyle = FormBorderStyle.FixedDialog;
         this.MaximizeBox = false;
         this.MinimizeBox = false;
-        this.Size = new System.Drawing.Size(400, 300);
+        this.Size = new System.Drawing.Size(400, 360);
 
         // Crear controles
         var lblTitle = new Label
@@ -59,18 +59,28 @@ public partial class MainMenuForm : Form
         };
         btnConsultaCuit.Click += BtnConsultaCuit_Click;
 
+        var btnConsultaComprobante = new Button
+        {
+            Text = "📋 Consultar Comprobante",
+            Font = new System.Drawing.Font("Arial", 11),
+            Location = new System.Drawing.Point(50, 230),
+            Size = new System.Drawing.Size(300, 50),
+            FlatStyle = FlatStyle.Flat
+        };
+        btnConsultaComprobante.Click += BtnConsultaComprobante_Click;
+
         var lblVersion = new Label
         {
             Text = "Versión 1.0 - Homologación",
             Font = new System.Drawing.Font("Arial", 8),
             ForeColor = System.Drawing.Color.Gray,
             TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
-            Location = new System.Drawing.Point(20, 240),
+            Location = new System.Drawing.Point(20, 300),
             Size = new System.Drawing.Size(360, 20)
         };
 
         // Agregar controles al formulario
-        this.Controls.AddRange(new Control[] { lblTitle, lblSubtitle, btnFacturacion, btnConsultaCuit, lblVersion });
+        this.Controls.AddRange(new Control[] { lblTitle, lblSubtitle, btnFacturacion, btnConsultaCuit, btnConsultaComprobante, lblVersion });
     }
 
     private void BtnFacturacion_Click(object? sender, EventArgs e)
@@ -83,5 +93,11 @@ public partial class MainMenuForm : Form
     {
         var formConsultaCuit = new ConsultaCuitForm();
         formConsultaCuit.Show();
+    }
+
+    private void BtnConsultaComprobante_Click(object? sender, EventArgs e)
+    {
+        var formConsultaComprobante = new ConsultaComprobanteForm();
+        formConsultaComprobante.Show();
     }
 }

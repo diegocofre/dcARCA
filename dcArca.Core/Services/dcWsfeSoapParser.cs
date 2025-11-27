@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Diego Cofré, DC Sistemas
+ * Copyright (c) 2025 Diego Cofré Sistemas
  * www.diegocofre.com.ar
  *
  * Licensed under the Apache License, Version 2.0.
@@ -7,6 +7,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
+using System.Globalization;
 using System.Net;
 using System.Xml;
 using dcArca.Core.Models;
@@ -193,16 +194,66 @@ public sealed class dcWsfeSoapParser
         }
 
         var resultGetNode = xmlDoc.SelectSingleNode("//ar:FECompConsultarResult/ar:ResultGet", nsmgr);
-        var caeNode = resultGetNode?.SelectSingleNode("ar:CodAutorizacion", nsmgr);
-        var caeVtoNode = resultGetNode?.SelectSingleNode("ar:FchVto", nsmgr);
 
-        if (resultGetNode != null && caeNode != null && !string.IsNullOrWhiteSpace(caeNode.InnerText))
+        if (resultGetNode != null)
         {
             result.Success = true;
-            result.Cae = WebUtility.HtmlDecode(caeNode.InnerText);
-            result.CaeVencimiento = WebUtility.HtmlDecode(caeVtoNode?.InnerText ?? string.Empty);
-            result.Mensaje = "Consulta de comprobante exitosa";
-            _logger.LogInformation($"[dcWsfeParser] Consulta FECompConsultar exitosa. CAE {result.Cae} (vence {result.CaeVencimiento}).");
+            result.Concepto = TryGetEnum<dcConcepto>(resultGetNode, nsmgr, "ar:Concepto");
+            result.DocTipo = TryGetEnum<dcTipoDocumento>(resultGetNode, nsmgr, "ar:DocTipo");
+            result.DocNro = TryGetLong(resultGetNode, nsmgr, "ar:DocNro");
+            result.CbteDesde = TryGetLong(resultGetNode, nsmgr, "ar:CbteDesde");
+            result.CbteHasta = TryGetLong(resultGetNode, nsmgr, "ar:CbteHasta");
+            result.TipoComprobante = TryGetEnum<dcTipoComprobante>(resultGetNode, nsmgr, "ar:CbteTipo");
+            result.PuntoVenta = TryGetInt(resultGetNode, nsmgr, "ar:PtoVta");
+            result.FechaComprobante = resultGetNode.SelectSingleNode("ar:CbteFch", nsmgr)?.InnerText ?? string.Empty;
+            result.FechaServicioDesde = resultGetNode.SelectSingleNode("ar:FchServDesde", nsmgr)?.InnerText ?? string.Empty;
+            result.FechaServicioHasta = resultGetNode.SelectSingleNode("ar:FchServHasta", nsmgr)?.InnerText ?? string.Empty;
+            result.FechaVencimientoPago = resultGetNode.SelectSingleNode("ar:FchVtoPago", nsmgr)?.InnerText ?? string.Empty;
+            result.EmisionTipo = resultGetNode.SelectSingleNode("ar:EmisionTipo", nsmgr)?.InnerText ?? string.Empty;
+            result.FechaProceso = resultGetNode.SelectSingleNode("ar:FchProceso", nsmgr)?.InnerText ?? string.Empty;
+
+            result.ImporteTotal = TryGetDecimal(resultGetNode, nsmgr, "ar:ImpTotal") ?? 0m;
+            result.ImporteNeto = TryGetDecimal(resultGetNode, nsmgr, "ar:ImpNeto") ?? 0m;
+            result.ImporteNoGravado = TryGetDecimal(resultGetNode, nsmgr, "ar:ImpTotConc") ?? 0m;
+            result.ImporteExento = TryGetDecimal(resultGetNode, nsmgr, "ar:ImpOpEx") ?? 0m;
+            result.ImporteTributos = TryGetDecimal(resultGetNode, nsmgr, "ar:ImpTrib") ?? 0m;
+            result.ImporteIva = TryGetDecimal(resultGetNode, nsmgr, "ar:ImpIVA") ?? 0m;
+            result.MonedaId = resultGetNode.SelectSingleNode("ar:MonId", nsmgr)?.InnerText ?? string.Empty;
+            result.MonedaCotizacion = TryGetDecimal(resultGetNode, nsmgr, "ar:MonCotiz") ?? 0m;
+            result.CondicionIvaReceptor = TryGetEnum<dcCondicionIvaReceptor>(resultGetNode, nsmgr, "ar:CondicionIVAReceptorId");
+
+            var caeNode = resultGetNode.SelectSingleNode("ar:CodAutorizacion", nsmgr);
+            var caeVtoNode = resultGetNode.SelectSingleNode("ar:FchVto", nsmgr);
+
+            if (caeNode != null && !string.IsNullOrWhiteSpace(caeNode.InnerText))
+            {
+                result.Cae = WebUtility.HtmlDecode(caeNode.InnerText);
+                result.CaeVencimiento = WebUtility.HtmlDecode(caeVtoNode?.InnerText ?? string.Empty);
+                result.Mensaje = "Consulta de comprobante exitosa";
+                _logger.LogInformation($"[dcWsfeParser] Consulta FECompConsultar exitosa. CAE {result.Cae} (vence {result.CaeVencimiento}).");
+            }
+            else
+            {
+                result.Mensaje = string.IsNullOrWhiteSpace(result.Resultado)
+                    ? "Consulta de comprobante realizada"
+                    : $"Resultado: {result.Resultado}";
+            }
+
+            result.Iva.Clear();
+            var ivaNodes = resultGetNode.SelectNodes("ar:Iva/ar:AlicIva", nsmgr);
+            if (ivaNodes != null)
+            {
+                foreach (XmlNode iva in ivaNodes)
+                {
+                    var detalle = new dcFacturaResponse.IvaDetalle
+                    {
+                        Alicuota = TryGetEnum<dcAlicuotaIva>(iva, nsmgr, "ar:Id"),
+                        BaseImponible = TryGetDecimal(iva, nsmgr, "ar:BaseImp") ?? 0m,
+                        Importe = TryGetDecimal(iva, nsmgr, "ar:Importe") ?? 0m
+                    };
+                    result.Iva.Add(detalle);
+                }
+            }
         }
         else
         {
@@ -214,6 +265,40 @@ public sealed class dcWsfeSoapParser
         }
 
         return result;
+    }
+
+    private static int? TryGetInt(XmlNode parent, XmlNamespaceManager ns, string xpath)
+    {
+        var text = parent.SelectSingleNode(xpath, ns)?.InnerText;
+        return int.TryParse(text, out var value) ? value : null;
+    }
+
+    private static long? TryGetLong(XmlNode parent, XmlNamespaceManager ns, string xpath)
+    {
+        var text = parent.SelectSingleNode(xpath, ns)?.InnerText;
+        return long.TryParse(text, out var value) ? value : null;
+    }
+
+    private static decimal? TryGetDecimal(XmlNode parent, XmlNamespaceManager ns, string xpath)
+    {
+        var text = parent.SelectSingleNode(xpath, ns)?.InnerText;
+        return decimal.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out var value)
+            ? value
+            : null;
+    }
+
+    private static TEnum? TryGetEnum<TEnum>(XmlNode parent, XmlNamespaceManager ns, string xpath)
+        where TEnum : struct, Enum
+    {
+        var raw = TryGetInt(parent, ns, xpath);
+        if (!raw.HasValue)
+        {
+            return null;
+        }
+
+        return Enum.IsDefined(typeof(TEnum), raw.Value)
+            ? (TEnum?)Enum.ToObject(typeof(TEnum), raw.Value)
+            : null;
     }
 
     /// <summary>
