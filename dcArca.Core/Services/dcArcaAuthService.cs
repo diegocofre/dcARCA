@@ -159,7 +159,39 @@ public class dcArcaAuthService
     private string SignLoginTicketRequest(string loginTicketRequest)
     {
         // Cargar certificado - usar PersistKeySet como en ejemplo oficial AFIP
-        var certificate = new X509Certificate2(_certificatePath, _certificatePassword, X509KeyStorageFlags.PersistKeySet);
+        X509Certificate2 certificate;
+        try
+        {
+            if (string.IsNullOrEmpty(_certificatePassword))
+            {
+                // Intentar cargar PFX sin contraseña (leer bytes y crear certificado sin password)
+                var raw = File.ReadAllBytes(_certificatePath);
+                certificate = new X509Certificate2(raw, (string?)null, X509KeyStorageFlags.PersistKeySet);
+            }
+            else
+            {
+                certificate = new X509Certificate2(_certificatePath, _certificatePassword, X509KeyStorageFlags.PersistKeySet);
+            }
+        }
+        catch (System.Security.Cryptography.CryptographicException ex)
+        {
+            // En algunos entornos ciertos PFX sin contraseña requieren pasar cadena vacía en lugar de null.
+            if (string.IsNullOrEmpty(_certificatePassword))
+            {
+                try
+                {
+                    certificate = new X509Certificate2(_certificatePath, string.Empty, X509KeyStorageFlags.PersistKeySet);
+                }
+                catch (System.Security.Cryptography.CryptographicException)
+                {
+                    throw new Exception($"No se pudo cargar el certificado .pfx sin contraseña. Verifique la ruta '{_certificatePath}' y el formato del archivo. Detalle: {ex.Message}", ex);
+                }
+            }
+            else
+            {
+                throw new Exception($"No se pudo cargar el certificado .pfx con la contraseña proporcionada. Verifique la ruta '{_certificatePath}' y la contraseña. Detalle: {ex.Message}", ex);
+            }
+        }
 
         // Validar que el certificado no esté vencido
         var nowUtc = DateTime.UtcNow;
@@ -173,28 +205,20 @@ public class dcArcaAuthService
         _logger.LogInformation($"[dcAuthService] Thumbprint: {certificate.Thumbprint}");
         _logger.LogInformation($"[dcAuthService] Válido hasta: {certificate.NotAfter:dd/MM/yyyy HH:mm}");
 
-        // PASO 2: Firmar el Login Ticket Request (según ejemplo oficial AFIP)
+        // Firmar el Login Ticket Request 
         try
         {
-            // Convertir el TRA a bytes UTF-8
             var msgBytes = Encoding.UTF8.GetBytes(loginTicketRequest);
-
-            // Crear ContentInfo con el mensaje (requerido para construir SignedCms)
             var contentInfo = new System.Security.Cryptography.Pkcs.ContentInfo(msgBytes);
-            
-            // Crear SignedCms
             var signedCms = new System.Security.Cryptography.Pkcs.SignedCms(contentInfo);
 
-            // Crear CmsSigner con las características del firmante (igual que ejemplo AFIP)
             var cmsSigner = new System.Security.Cryptography.Pkcs.CmsSigner(certificate);
             cmsSigner.IncludeOption = System.Security.Cryptography.X509Certificates.X509IncludeOption.EndCertOnly;
 
-            // Firmar el mensaje PKCS#7
             signedCms.ComputeSignature(cmsSigner);
 
             _logger.LogInformation("[dcAuthService] Mensaje firmado con PKCS#7");
 
-            // Encodear el mensaje PKCS#7 y devolver como Base64 (SIN wrappers PEM)
             var encodedSignedCms = signedCms.Encode();
             return Convert.ToBase64String(encodedSignedCms);
         }
@@ -226,7 +250,6 @@ public class dcArcaAuthService
 
     if (!response.IsSuccessStatusCode)
         {
-            // Intentar parsear Fault SOAP para obtener detalles ricos
             try
             {
                 var xmlDoc = new XmlDocument();
@@ -247,7 +270,6 @@ public class dcArcaAuthService
             }
             catch (XmlException)
             {
-                // Si no es XML válido, aún informar el texto recibido
                 throw new dcWsaaFaultException((int)response.StatusCode, null, $"HTTP {(int)response.StatusCode} {response.ReasonPhrase}", responseText, responseText);
             }
         }

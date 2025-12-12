@@ -26,7 +26,7 @@ Copia `appsettings.example.json` a `appsettings.json` y edita:
   "dcArcaConfig": {
     "Cuit": "TU_CUIT",
     "CertificatePath": "C:\\Ruta\\Certificado.pfx",
-    "CertificatePassword": "TU_PASSWORD",
+    "CertificatePassword": "TU_PASSWORD" /* Puede dejarse vacío si el .pfx no tiene contraseña */,
     "WsaaUrl": "https://wsaahomo.afip.gov.ar/ws/services/LoginCms",
     "WsfeUrl": "https://wswhomo.afip.gov.ar/wsfev1/service.asmx",
     "PadronUrl": "https://awshomo.afip.gov.ar/sr-padron/webservices/personaServiceA5",
@@ -72,39 +72,91 @@ dotnet build
 dotnet run --project dcArca.TestApp
 ```
 
-## 🔐 Configuración del Certificado ARCA
+## 🔐 Configuración del Certificado ARCA - Homologación
 
-### Paso 1: Generar CSR
+Esta sección describe el proceso para obtener un certificado digital en el ambiente de **Testing/Homologación** de ARCA. Para producción, el procedimiento es diferente (ver documentación oficial de AFIP).
+
+### Requisitos previos
+- OpenSSL instalado ([Descargar](https://slproweb.com/products/Win32OpenSSL.html) para Windows o usar `choco install openssl`)
+- Acceso al portal WSASS con Clave Fiscal
+- CUIT activo en ARCA
+
+### Paso 1: Generar clave privada y CSR
+
 ```powershell
-# Instalar OpenSSL
-choco install openssl
-
-# Generar clave privada
+# Generar clave privada (2048 bits)
 openssl genrsa -out certificado.key 2048
 
-# Crear CSR
-openssl req -new -key certificado.key -out certificado.csr -subj "/C=AR/O=TuEmpresa/CN=WSFE/serialNumber=CUIT TU_CUIT"
+# Crear CSR (Certificate Signing Request)
+# IMPORTANTE: Reemplazá TU_CUIT por tu CUIT sin guiones
+openssl req -new -key certificado.key -out certificado.csr -subj "/C=AR/O=Sistema/OU=Servicios/CN=TU_CUIT"
 ```
 
-### Paso 2: Subir a ARCA
-1. Accede a https://auth.afip.gov.ar/
-2. Ingresa con CUIT y Clave Fiscal
-3. Ve a "WSASS - Certificados para Testing"
-4. Sube el `.csr` para servicio `wsfe`
-5. Descarga el `.crt` firmado
+**Nota**: El CUIT debe ir en el campo `CN` (Common Name) del certificado.
 
-### Paso 3: Generar .pfx
+### Paso 2: Crear certificado en WSASS (Homologación)
+
+1. Ingresa a **[https://auth.afip.gob.ar/](https://auth.afip.gob.ar/)** con tu CUIT y Clave Fiscal
+2. Andá a la sección **"WSASS Autoservicio de Acceso a WebServices (TESTING/HOMOLOGACIÓN)"**
+3. En el menú lateral, hace clic en **"Nuevo Certificado"**
+4. Completa el formulario:
+   - **Nombre simbólico del DN** (alias): elegí un nombre identificable, ej: `arcahomo01`
+   - **CUIT del contribuyente**: tu CUIT (se completa automáticamente)
+   - **Solicitud de certificado en formato PKCS#10**: abrí `certificado.csr` con un editor de texto, copiá **todo el contenido** (incluyendo `-----BEGIN CERTIFICATE REQUEST-----` y `-----END CERTIFICATE REQUEST-----`) y pegalo en el campo
+5. Hace clic en **"Crear DN y obtener certificado"**
+
+### Paso 3: Obtener el certificado firmado
+
+
+1. Copiá **todo el contenido** del certificado que aparece en pantalla, incluyendo:
+```
+-----BEGIN CERTIFICATE-----
+MIIDbTC...
+-----END CERTIFICATE-----
+```
+
+2. Guardalo en un archivo de texto llamado `certificado.crt`
+
+### Paso 4: Convertir a formato .pfx
+
 ```powershell
-# Combinar clave privada y certificado
+# Con contraseña (recomendado para producción)
 openssl pkcs12 -export -out certificado.pfx -inkey certificado.key -in certificado.crt -password pass:TU_PASSWORD
+
+# Sin contraseña (útil para testing, menos seguro)
+openssl pkcs12 -export -nodes -out certificado.pfx -inkey certificado.key -in certificado.crt
 ```
 
-### Paso 4: Autorizar Servicios
-En ARCA, autoriza el certificado para:
-- `wsfe` (facturación)
-- `ws_sr_padron_a5` (padrón, opcional)
+**Importante**: Guardá `certificado.pfx` en un lugar seguro y **nunca lo subas al repositorio**.
 
-**Nota**: Para homologación, registra un "Computador Fiscal" si es requerido.
+### Paso 5: Autorizar servicios para el certificado
+
+1. En WSASS, andá a **"Servicios"** en el menú lateral
+2. Buscá y hace clic en el servicio que necesitás (ej: `wsfe` para facturación, `ws_sr_padron_a5` para padrón)
+3. En la pantalla de información del servicio, hace clic en **"Crear autorización para acceder a este servicio"**
+4. Seleccioná:
+   - **Nombre simbólico del DN a autorizar**: elegí el alias que creaste antes (ej: `arcahomo01`)
+   - **CUIT del DN a autorizar**: tu CUIT
+   - **CUIT representado**: tu CUIT
+   - **Servicio**: el servicio correspondiente
+5. Hace clic en **"Crear autorización de acceso"**
+
+**Servicios necesarios para dcARCA**:
+- `wsfe` (Facturación Electrónica - obligatorio)
+- `ws_sr_padron_a5` (Consulta de Padrón - opcional, pero recomendado)
+
+### Paso 6: Verificar autorizaciones
+
+1. En el menú lateral, andá a **"Autorizaciones"**
+2. Verificá que aparezcan las autorizaciones creadas para tu alias
+3. Si todo está OK, el certificado ya está listo para usar
+
+### Resumen de archivos generados
+
+- `certificado.key` → Clave privada (mantener segura, nunca compartir)
+- `certificado.csr` → Solicitud de certificado (solo se usa una vez)
+- `certificado.crt` → Certificado público firmado por ARCA
+- `certificado.pfx` → Certificado + clave privada en formato Windows/NET (el que usás en `appsettings.json`)
 
 ## ⚙️ Configuración
 
@@ -123,6 +175,76 @@ Edita `appsettings.json`:
   }
 }
 ```
+
+## 🔐 Gestión del Certificado en Producción
+
+El proceso de producción difiere del ambiente de homologación. En lugar de WSASS, debés utilizar el **Administrador de Certificados Digitales** de ARCA/AFIP.
+
+### Paso 1: Generar CSR (igual que homologación)
+
+```powershell
+# Generar clave privada
+openssl genrsa -out certificado_prod.key 2048
+
+# Crear CSR con tu CUIT en el campo CN
+openssl req -new -key certificado_prod.key -out certificado_prod.csr -subj "/C=AR/O=Sistema/OU=Servicios/CN=TU_CUIT"
+```
+
+### Paso 2: Solicitar certificado en producción
+
+1. Ingresa al **Administrador de Certificados Digitales** desde [https://www.arca.gob.ar](https://www.arca.gob.ar) con tu CUIT y Clave Fiscal
+2. Subí el archivo `certificado_prod.csr` en el formulario de solicitud
+3. El sistema generará y **mostrará el certificado X.509 en pantalla** (no hay descarga automática)
+4. Copiá todo el contenido, incluyendo:
+```
+-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+```
+5. Guardalo como `certificado_prod.crt`
+
+### Paso 3: Convertir a .pfx
+
+```powershell
+# Con contraseña (recomendado)
+openssl pkcs12 -export -out certificado_prod.pfx -inkey certificado_prod.key -in certificado_prod.crt -password pass:TU_PASSWORD_SEGURO
+```
+
+### Paso 4: Autorizar servicios en producción
+
+**Importante**: En producción NO se usa WSASS. Debés utilizar el **Administrador de Relaciones de Clave Fiscal**.
+
+1. Ingresa al **Administrador de Relaciones de Clave Fiscal** desde [https://www.arca.gob.ar](https://www.arca.gob.ar) con tu CUIT
+2. Creá una **nueva relación** para autorizar servicios web
+3. Selecciona y habilita los servicios necesarios:
+   - `wsfe` (Factura Electrónica)
+   - `ws_sr_padron_a5` (Consulta de Padrón)
+4. Confirmá la autorización del certificado para cada servicio
+
+**Nota**: Asegurate de asociar correctamente el alias/computador fiscal a los servicios habilitados para evitar errores de "certificado no autorizado".
+
+### Paso 5: Actualizar configuración
+
+Modificá `appsettings.json` con las URLs de producción y la ruta al nuevo certificado:
+
+```json
+{
+  "dcArcaConfig": {
+    "Cuit": "TU_CUIT",
+    "CertificatePath": "C:\\Certificados\\certificado_prod.pfx",
+    "CertificatePassword": "TU_PASSWORD_SEGURO",
+    "WsaaUrl": "https://wsaa.afip.gov.ar/ws/services/LoginCms",
+    "WsfeUrl": "https://servicios1.afip.gov.ar/wsfev1/service.asmx",
+    "PadronUrl": "https://aws.afip.gov.ar/sr-padron/webservices/personaServiceA5",
+    "PuntoVenta": TU_PUNTO_VENTA_PRODUCTIVO
+  }
+}
+```
+
+**⚠️ Recordatorios importantes**:
+- **No mezcles certificados**: el certificado de testing NO funciona con endpoints de producción
+- Cada ambiente (homologación/producción) usa su propio certificado y autorización
+- Los endpoints de WSAA y servicios de negocio (Factura, Padrón) son diferentes según el ambiente
 
 **URLs de Producción**:
 - WSAA: `https://wsaa.afip.gov.ar/ws/services/LoginCms`
@@ -261,6 +383,10 @@ La WinForms Test App incluye un formulario dedicado para consultar cualquier com
 - Agrega `appsettings.json` a `.gitignore`
 - Usa variables de entorno o Key Vault en producción
 - Rota certificados antes del vencimiento
+
+Nota sobre .pfx sin contraseña:
+- La librería soporta `.pfx` sin contraseña. Si tu archivo `.pfx` no está protegido por password puedes dejar `CertificatePassword` vacío (`""`) o eliminar la clave del `appsettings.json`. 
+- Advertencia: los `.pfx` sin contraseña son menos seguros; evita su uso en producción y protege el archivo con permisos de sistema o almacén seguro (Key Vault, etc.).
 
 ## 📖 Referencias
 
