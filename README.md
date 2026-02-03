@@ -1,6 +1,6 @@
 # dcARCA - Facturación Electrónica Argentina
 
-**dcARCA** es un componente .NET 8 para implementar facturación electrónica Argentina utilizando el web service **WSFEv1 de AFIP (ARCA)** y consultar el padrón oficial **ws_sr_padron_a5** para validar CUIT. 
+**dcARCA** es un componente .NET 8 para implementar facturación electrónica Argentina utilizando el web service **WSFEv1 de AFIP (ARCA)** y consultar el padrón oficial **ws_sr_constancia_inscripcion** (antes ws_sr_padron_a5) para validar CUIT. 
 Esta librería NO ES un producto oficial de ARCA ni del Gobierno Argentino,sino una implementación independiente desarrollada por **Diego Cofré Sistemas**. [www.diegocofre.com.ar](http://www.diegocofre.com.ar)
 
 ## Licencia
@@ -132,7 +132,7 @@ openssl pkcs12 -export -nodes -out certificado.pfx -inkey certificado.key -in ce
 ### Paso 5: Autorizar servicios para el certificado
 
 1. En WSASS, andá a **"Servicios"** en el menú lateral
-2. Buscá y hace clic en el servicio que necesitás (ej: `wsfe` para facturación, `ws_sr_padron_a5` para padrón)
+2. Buscá y hace clic en el servicio que necesitás (ej: `wsfe` para facturación, `ws_sr_constancia_inscripcion` para padrón)
 3. En la pantalla de información del servicio, hace clic en **"Crear autorización para acceder a este servicio"**
 4. Seleccioná:
    - **Nombre simbólico del DN a autorizar**: elegí el alias que creaste antes (ej: `arcahomo01`)
@@ -143,7 +143,8 @@ openssl pkcs12 -export -nodes -out certificado.pfx -inkey certificado.key -in ce
 
 **Servicios necesarios para dcARCA**:
 - `wsfe` (Facturación Electrónica - obligatorio)
-- `ws_sr_padron_a5` (Consulta de Padrón - opcional, pero recomendado)
+- `ws_sr_constancia_inscripcion` (Consulta de Padrón - opcional, pero recomendado)
+
 
 ### Paso 6: Verificar autorizaciones
 
@@ -218,7 +219,8 @@ openssl pkcs12 -export -out certificado_prod.pfx -inkey certificado_prod.key -in
 2. Creá una **nueva relación** para autorizar servicios web
 3. Selecciona y habilita los servicios necesarios:
    - `wsfe` (Factura Electrónica)
-   - `ws_sr_padron_a5` (Consulta de Padrón)
+   - `ws_sr_constancia_inscripcion` (Consulta de Padrón / Constancia de Inscripción)
+   - **Nota**: Si no lo encontrás, buscá por `ws_sr_padron_a5` (nombre antiguo)
 4. Confirmá la autorización del certificado para cada servicio
 
 **Nota**: Asegurate de asociar correctamente el alias/computador fiscal a los servicios habilitados para evitar errores de "certificado no autorizado".
@@ -363,7 +365,7 @@ La WinForms Test App incluye un formulario dedicado para consultar cualquier com
 
 ### Token inválido
 - Autoriza el certificado para `wsfe` en ARCA
-- Para padrón: autoriza para `ws_sr_padron_a5`
+- Para padrón: autoriza para `ws_sr_constancia_inscripcion` (o `ws_sr_padron_a5` si aparece con el nombre antiguo en tu panel)
 
 ### CUIT no autorizado
 - Verifica que tu CUIT tenga permisos en ARCA
@@ -391,7 +393,7 @@ Nota sobre .pfx sin contraseña:
 ## 📖 Referencias
 
 - [ARCA WSFEv1](https://www.afip.gob.ar/ws/WSFE/documentacion.asp)
-- [Padrón A5](https://www.afip.gob.ar/ws/documentacion/ws-padron-a5.asp)
+- [Padrón - Constancia de Inscripción](https://www.afip.gob.ar/ws/documentacion/ws-padron-a5.asp) (servicio `ws_sr_constancia_inscripcion`)
 - [WSAA](https://www.afip.gob.ar/ws/WSAA/wsaa.html)
 
 **diego cofré sistemas** http://www.diegocofre.com.ar - Soluciones en .NET

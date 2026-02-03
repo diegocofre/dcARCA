@@ -16,7 +16,7 @@ using dcArca.Core.Services.Logging;
 namespace dcArca.Core.Services;
 
 /// <summary>
-/// Cliente SOAP para el padrón ws_sr_padron_a5 (consulta de CUITs)
+/// Cliente SOAP para el padrón ws_sr_constancia_inscripcion (consulta de CUITs)
 /// </summary>
 public class dcPadronClient : IdcPadronClient, IDisposable
 {
@@ -36,7 +36,7 @@ public class dcPadronClient : IdcPadronClient, IDisposable
         _config = config ?? throw new ArgumentNullException(nameof(config));
         _logger = logger ?? NoOpAfipLogger.Instance;
         _padronUrl = string.IsNullOrWhiteSpace(config.PadronUrl)
-            ? "https://awshomo.afip.gov.ar/sr-padron/webservices/personaServiceA5"
+            ? "https://awshomo.arca.gov.ar/sr-padron/webservices/personaServiceA5"
             : config.PadronUrl;
 
         _authService = authService ?? new dcArcaAuthService(
@@ -44,7 +44,7 @@ public class dcPadronClient : IdcPadronClient, IDisposable
             config.CertificatePath,
             config.CertificatePassword,
             config.Cuit,
-            serviceName: "ws_sr_padron_a5",
+            serviceName: "ws_sr_constancia_inscripcion",
             logger: _logger);
         if (httpClient != null)
         {
@@ -69,7 +69,7 @@ public class dcPadronClient : IdcPadronClient, IDisposable
         {
             var (token, sign) = await _authService.GetTokenAsync(cancellationToken);
             var soapRequest = BuildGetPersonaRequest(token, sign, cuit);
-            var (responseBody, statusCode) = await SendSoapRequestAsync(soapRequest, "http://a5.soap.ws.server.puc.sr/getPersona", cancellationToken);
+            var (responseBody, statusCode) = await SendSoapRequestAsync(soapRequest, "http://a5.soap.ws.server.puc.sr/getPersona_v2", cancellationToken);
             return ParsePersonaResponse(responseBody, cuit, statusCode);
         }
         catch (dcWsaaFaultException wsaaEx)
@@ -95,12 +95,12 @@ public class dcPadronClient : IdcPadronClient, IDisposable
             <soapenv:Envelope xmlns:soapenv=""{SoapNamespace}"" xmlns:a5=""{PadronNamespace}"">
                 <soapenv:Header/>
                 <soapenv:Body>
-                    <a5:getPersona>
+                    <a5:getPersona_v2>
                         <token>{token}</token>
                         <sign>{sign}</sign>
                         <cuitRepresentada>{_config.Cuit}</cuitRepresentada>
                         <idPersona>{cuit}</idPersona>
-                    </a5:getPersona>
+                    </a5:getPersona_v2>
                 </soapenv:Body>
             </soapenv:Envelope>";
     }
