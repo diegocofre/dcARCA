@@ -30,95 +30,88 @@ public partial class ConsultaComprobanteForm : Form
 
     private void InitializeComponent()
     {
+        this.SuspendLayout();
+
         this.Text = "Consultar Comprobante";
         this.StartPosition = FormStartPosition.CenterScreen;
-        this.Size = new System.Drawing.Size(700, 600);
-        this.FormBorderStyle = FormBorderStyle.FixedDialog;
-        this.MaximizeBox = false;
+        this.AutoScaleMode = AutoScaleMode.Dpi;
+        this.ClientSize = new System.Drawing.Size(700, 600);
+        this.MinimumSize = new System.Drawing.Size(500, 450);
+        this.FormBorderStyle = FormBorderStyle.Sizable;
+        this.MaximizeBox = true;
 
-        // Label título
+        // Layout principal
+        var mainLayout = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 2,
+            RowCount = 6,
+            Padding = new Padding(8)
+        };
+        mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 160));
+        mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // title
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // tipo
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // numero + btn
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // estado
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // resultado label
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F)); // resultado textbox
+
+        // Label título (spans both cols)
         var lblTitle = new Label
         {
             Text = "Consulta de Comprobante (FECompConsultar)",
-            Font = new System.Drawing.Font("Arial", 14, System.Drawing.FontStyle.Bold),
-            Location = new System.Drawing.Point(20, 20),
-            Size = new System.Drawing.Size(650, 30)
+            Font = new System.Drawing.Font("Segoe UI", 14, System.Drawing.FontStyle.Bold),
+            AutoSize = true,
+            Dock = DockStyle.Fill
         };
+        mainLayout.Controls.Add(lblTitle, 0, 0);
+        mainLayout.SetColumnSpan(lblTitle, 2);
 
         // Tipo de Comprobante
-        var lblTipo = new Label
-        {
-            Text = "Tipo de Comprobante:",
-            Location = new System.Drawing.Point(20, 70),
-            Size = new System.Drawing.Size(150, 20)
-        };
-
-        cboTipoComprobante = new ComboBox
-        {
-            Location = new System.Drawing.Point(180, 68),
-            Size = new System.Drawing.Size(480, 25),
-            DropDownStyle = ComboBoxStyle.DropDownList
-        };
+        var lblTipo = new Label { Text = "Tipo:", Dock = DockStyle.Fill, TextAlign = System.Drawing.ContentAlignment.MiddleLeft, AutoSize = true };
+        cboTipoComprobante = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList };
         CargarTiposComprobante();
+        mainLayout.Controls.Add(lblTipo, 0, 1);
+        mainLayout.Controls.Add(cboTipoComprobante, 1, 1);
 
-        // Número de Comprobante
-        var lblNumero = new Label
-        {
-            Text = "Número de Comprobante:",
-            Location = new System.Drawing.Point(20, 110),
-            Size = new System.Drawing.Size(150, 20)
-        };
-
-        txtNumeroComprobante = new TextBox
-        {
-            Location = new System.Drawing.Point(180, 108),
-            Size = new System.Drawing.Size(200, 25)
-        };
-
-        // Botón Consultar
-        btnConsultar = new Button
-        {
-            Text = "🔍 Consultar",
-            Location = new System.Drawing.Point(180, 150),
-            Size = new System.Drawing.Size(150, 35),
-            Font = new System.Drawing.Font("Arial", 10, System.Drawing.FontStyle.Bold)
-        };
+        // Número de Comprobante + botón en un panel flexible
+        var lblNumero = new Label { Text = "Número:", Dock = DockStyle.Fill, TextAlign = System.Drawing.ContentAlignment.MiddleLeft, AutoSize = true };
+        var flow = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.LeftToRight, AutoSize = true, WrapContents = false };
+        txtNumeroComprobante = new TextBox { Width = 200, Margin = new Padding(0, 3, 6, 3) };
+        btnConsultar = new Button { Text = "🔍 Consultar", AutoSize = true, Padding = new Padding(8, 4, 8, 4), Margin = new Padding(0, 0, 0, 0) };
         btnConsultar.Click += BtnConsultar_Click;
+        flow.Controls.Add(txtNumeroComprobante);
+        flow.Controls.Add(btnConsultar);
+        mainLayout.Controls.Add(lblNumero, 0, 2);
+        mainLayout.Controls.Add(flow, 1, 2);
 
-        // Label Estado
-        lblEstado = new Label
-        {
-            Text = "Listo para consultar",
-            Location = new System.Drawing.Point(20, 200),
-            Size = new System.Drawing.Size(650, 20),
-            ForeColor = System.Drawing.Color.Blue
-        };
+        // Label Estado (spans both cols)
+        lblEstado = new Label { Text = "Listo para consultar", ForeColor = System.Drawing.Color.Blue, Dock = DockStyle.Fill, AutoSize = true };
+        mainLayout.Controls.Add(lblEstado, 0, 3);
+        mainLayout.SetColumnSpan(lblEstado, 2);
 
-        // TextBox Resultado
-        var lblResultado = new Label
-        {
-            Text = "Resultado:",
-            Location = new System.Drawing.Point(20, 230),
-            Size = new System.Drawing.Size(100, 20)
-        };
+        // Resultado label
+        var lblResultado = new Label { Text = "Resultado:", Dock = DockStyle.Fill, AutoSize = true };
+        mainLayout.Controls.Add(lblResultado, 0, 4);
+        mainLayout.SetColumnSpan(lblResultado, 2);
 
+        // Resultado textbox que ocupa el resto y se adapta
         txtResultado = new TextBox
         {
-            Location = new System.Drawing.Point(20, 255),
-            Size = new System.Drawing.Size(640, 280),
             Multiline = true,
             ScrollBars = ScrollBars.Both,
             ReadOnly = true,
-            Font = new System.Drawing.Font("Courier New", 9)
+            Font = new System.Drawing.Font("Courier New", 9),
+            Dock = DockStyle.Fill
         };
+        mainLayout.Controls.Add(txtResultado, 0, 5);
+        mainLayout.SetColumnSpan(txtResultado, 2);
 
-        // Agregar controles
-        this.Controls.AddRange(new Control[]
-        {
-            lblTitle, lblTipo, cboTipoComprobante,
-            lblNumero, txtNumeroComprobante,
-            btnConsultar, lblEstado, lblResultado, txtResultado
-        });
+        this.Controls.Add(mainLayout);
+
+        this.ResumeLayout(false);
+        this.PerformLayout();
     }
 
     private void CargarTiposComprobante()

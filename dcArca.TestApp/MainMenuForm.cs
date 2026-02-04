@@ -19,68 +19,84 @@ public partial class MainMenuForm : Form
         this.FormBorderStyle = FormBorderStyle.FixedDialog;
         this.MaximizeBox = false;
         this.MinimizeBox = false;
-        this.Size = new System.Drawing.Size(400, 360);
+        this.AutoScaleMode = AutoScaleMode.Dpi;
+        this.ClientSize = new System.Drawing.Size(420, 400);
 
-        // Crear controles
+        var tableLayout = new TableLayoutPanel
+        {
+            ColumnCount = 1,
+            Dock = DockStyle.Fill,
+            Padding = new Padding(10)
+        };
+        this.Controls.Add(tableLayout);
+
+        // RowStyles
+        tableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 60)); // Title
+        tableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30)); // Subtitle
+        tableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F)); // Button 1
+        tableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F)); // Button 2
+        tableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F)); // Button 3
+        tableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30)); // Version
+
+        // Controls
         var lblTitle = new Label
         {
-            Text = "dcARCA - Test de Servicios",
-            Font = new System.Drawing.Font("Arial", 16, System.Drawing.FontStyle.Bold),
+            Text = "Test de Servicios",
+            Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold),
             TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
-            Location = new System.Drawing.Point(20, 20),
-            Size = new System.Drawing.Size(360, 40)
+            Dock = DockStyle.Fill
         };
 
         var lblSubtitle = new Label
         {
             Text = "Seleccione el servicio a probar:",
-            Font = new System.Drawing.Font("Arial", 10),
-            Location = new System.Drawing.Point(20, 70),
-            Size = new System.Drawing.Size(360, 20)
+            Font = new System.Drawing.Font("Segoe UI", 10F),
+            TextAlign = System.Drawing.ContentAlignment.MiddleLeft,
+            Dock = DockStyle.Fill
         };
 
         var btnFacturacion = new Button
         {
             Text = "📄 Facturación Electrónica (WSFE)",
-            Font = new System.Drawing.Font("Arial", 11),
-            Location = new System.Drawing.Point(50, 110),
-            Size = new System.Drawing.Size(300, 50),
-            FlatStyle = FlatStyle.Flat
+            Font = new System.Drawing.Font("Segoe UI", 11F),
+            Dock = DockStyle.Fill,
+            Margin = new Padding(20, 8, 20, 8)
         };
         btnFacturacion.Click += BtnFacturacion_Click;
 
         var btnConsultaCuit = new Button
         {
             Text = "🔍 Consulta de CUIT (Padron)",
-            Font = new System.Drawing.Font("Arial", 11),
-            Location = new System.Drawing.Point(50, 170),
-            Size = new System.Drawing.Size(300, 50),
-            FlatStyle = FlatStyle.Flat
+            Font = new System.Drawing.Font("Segoe UI", 11F),
+            Dock = DockStyle.Fill,
+            Margin = new Padding(20, 8, 20, 8)
         };
         btnConsultaCuit.Click += BtnConsultaCuit_Click;
 
         var btnConsultaComprobante = new Button
         {
             Text = "📋 Consultar Comprobante",
-            Font = new System.Drawing.Font("Arial", 11),
-            Location = new System.Drawing.Point(50, 230),
-            Size = new System.Drawing.Size(300, 50),
-            FlatStyle = FlatStyle.Flat
+            Font = new System.Drawing.Font("Segoe UI", 11F),
+            Dock = DockStyle.Fill,
+            Margin = new Padding(20, 8, 20, 8)
         };
         btnConsultaComprobante.Click += BtnConsultaComprobante_Click;
 
         var lblVersion = new Label
         {
-            Text = "Versión 1.0 - Homologación",
-            Font = new System.Drawing.Font("Arial", 8),
+            Text = "Versión 1.0",
+            Font = new System.Drawing.Font("Segoe UI", 8F),
             ForeColor = System.Drawing.Color.Gray,
-            TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
-            Location = new System.Drawing.Point(20, 300),
-            Size = new System.Drawing.Size(360, 20)
+            TextAlign = System.Drawing.ContentAlignment.BottomCenter,
+            Dock = DockStyle.Fill
         };
 
-        // Agregar controles al formulario
-        this.Controls.AddRange(new Control[] { lblTitle, lblSubtitle, btnFacturacion, btnConsultaCuit, btnConsultaComprobante, lblVersion });
+        tableLayout.Controls.Add(lblTitle, 0, 0);
+        tableLayout.Controls.Add(lblSubtitle, 0, 1);
+        tableLayout.Controls.Add(btnFacturacion, 0, 2);
+        tableLayout.Controls.Add(btnConsultaCuit, 0, 3);
+        tableLayout.Controls.Add(btnConsultaComprobante, 0, 4);
+        tableLayout.Controls.Add(lblVersion, 0, 5);
     }
 
     private void BtnFacturacion_Click(object? sender, EventArgs e)
@@ -93,6 +109,11 @@ public partial class MainMenuForm : Form
     {
         var formConsultaCuit = new ConsultaCuitForm();
         formConsultaCuit.Show();
+    }
+
+    private void InitializeComponent()
+    {
+
     }
 
     private void BtnConsultaComprobante_Click(object? sender, EventArgs e)

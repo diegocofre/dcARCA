@@ -67,7 +67,7 @@ public class dcFacturaRequest
     /// <summary>
     /// Condición frente al IVA del receptor (obligatoria para RG 5616)
     /// </summary>
-    public string? CondicionIvaReceptor { get; set; }
+    public dcCondicionIvaReceptor? CondicionIvaReceptor { get; set; }
 
     /// <summary>
     /// Importe neto gravado (sin IVA)

@@ -29,7 +29,10 @@ public partial class ConsultaCuitForm : Form
     {
         this.Text = "dcARCA - Consulta de CUIT";
         this.StartPosition = FormStartPosition.CenterScreen;
-        this.Size = new System.Drawing.Size(600, 500);
+        this.AutoScaleMode = AutoScaleMode.Dpi;
+        this.ClientSize = new System.Drawing.Size(700, 600);
+        this.MinimumSize = new System.Drawing.Size(550, 400);
+        this.Font = new System.Drawing.Font("Segoe UI", 9F);
 
         CargarConfiguracion();
         InicializarControles();
@@ -37,60 +40,81 @@ public partial class ConsultaCuitForm : Form
 
     private void InicializarControles()
     {
-        // Label de título
+        var mainLayout = new TableLayoutPanel
+        {
+            ColumnCount = 1,
+            RowCount = 3,
+            Dock = DockStyle.Fill,
+            Padding = new Padding(16)
+        };
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // Title
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // Input
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); // Result
+        this.Controls.Add(mainLayout);
+
+        // --- Title ---
         var lblTitle = new Label
         {
             Text = "Consulta de Información de CUIT",
-            Font = new System.Drawing.Font("Arial", 14, System.Drawing.FontStyle.Bold),
-            Location = new System.Drawing.Point(20, 20),
-            Size = new System.Drawing.Size(400, 30)
+            Font = new System.Drawing.Font("Segoe UI", 14, System.Drawing.FontStyle.Bold),
+            AutoSize = true,
+            Padding = new Padding(0, 0, 0, 8),
+            TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        };
+        mainLayout.Controls.Add(lblTitle, 0, 0);
+
+        // --- Input Panel ---
+        var inputPanel = new FlowLayoutPanel
+        {
+            FlowDirection = FlowDirection.LeftToRight,
+            Dock = DockStyle.Fill,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            WrapContents = false,
+            Margin = new Padding(0, 0, 0, 0)
         };
 
-        // Label y TextBox para CUIT
         var lblCuit = new Label
         {
             Text = "CUIT:",
-            Location = new System.Drawing.Point(20, 60),
-            Size = new System.Drawing.Size(50, 20)
+            AutoSize = true,
+            TextAlign = System.Drawing.ContentAlignment.MiddleLeft,
+            Margin = new Padding(0, 8, 4, 0)
         };
 
-        var txtCuit = new TextBox
+        _txtCuit = new TextBox
         {
-            Location = new System.Drawing.Point(80, 55),
-            Size = new System.Drawing.Size(150, 20),
-            MaxLength = 11
+            Width = 140,
+            MaxLength = 13,
+            Margin = new Padding(0, 5, 8, 0)
         };
-        txtCuit.TextChanged += TxtCuit_TextChanged;
+        _txtCuit.TextChanged += TxtCuit_TextChanged;
 
-        // Botón consultar
-        var btnConsultar = new Button
+        _btnConsultar = new Button
         {
             Text = "🔍 Consultar",
-            Location = new System.Drawing.Point(250, 50),
-            Size = new System.Drawing.Size(100, 30),
-            FlatStyle = FlatStyle.Flat,
-            Enabled = false
+            AutoSize = true,
+            Enabled = false,
+            Margin = new Padding(0, 3, 0, 0)
         };
-        btnConsultar.Click += BtnConsultar_Click;
+        _btnConsultar.Click += BtnConsultar_Click;
 
-        // TextBox para resultados
-        var txtResultado = new TextBox
+        inputPanel.Controls.Add(lblCuit);
+        inputPanel.Controls.Add(_txtCuit);
+        inputPanel.Controls.Add(_btnConsultar);
+        mainLayout.Controls.Add(inputPanel, 0, 1);
+
+        // --- Result TextBox ---
+        _txtResultado = new TextBox
         {
-            Location = new System.Drawing.Point(20, 100),
-            Size = new System.Drawing.Size(540, 350),
+            Dock = DockStyle.Fill,
             Multiline = true,
             ScrollBars = ScrollBars.Vertical,
             ReadOnly = true,
-            Font = new System.Drawing.Font("Consolas", 9)
+            Font = new System.Drawing.Font("Consolas", 9.5F),
+            Margin = new Padding(0, 10, 0, 0)
         };
-
-        // Agregar controles
-        this.Controls.AddRange(new Control[] { lblTitle, lblCuit, txtCuit, btnConsultar, txtResultado });
-
-        // Guardar referencias para usar en eventos
-        _txtCuit = txtCuit;
-        _txtResultado = txtResultado;
-        _btnConsultar = btnConsultar;
+        mainLayout.Controls.Add(_txtResultado, 0, 2);
     }
 
     private void CargarConfiguracion()

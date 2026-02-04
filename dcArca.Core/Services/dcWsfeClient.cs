@@ -234,14 +234,11 @@ public class dcWsfeClient : IdcWsfeClient, IDisposable
 
             var (token, sign) = await _authService.GetTokenAsync(cancellationToken);
 
-            if (string.IsNullOrWhiteSpace(factura.CondicionIvaReceptor))
+            if (factura.CondicionIvaReceptor ==null)
             {
                 _logger.LogWarning("[dcWsfeClient] No se especificó Condición IVA; se enviará vacío y AFIP determinará el resultado.");
             }
-            else
-            {
-                factura.CondicionIvaReceptor = factura.CondicionIvaReceptor.Trim();
-            }
+
 
             var soapRequest = _soapBuilder.BuildSolicitarCaeRequest(token, sign, factura, nroComprobante, tipoComprobante, concepto);
 

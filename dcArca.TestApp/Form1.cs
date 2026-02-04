@@ -358,7 +358,7 @@ public partial class Form1 : Form
             {
                 CuitReceptor = cuitReceptor,
                 TipoDocReceptor = 80, // CUIT
-                CondicionIvaReceptor = condicionSeleccionada.Id,
+                CondicionIvaReceptor = (dcCondicionIvaReceptor?)int.Parse( condicionSeleccionada.Id),
                 ImporteNeto = esClaseC ? totalParaEnviar : importeNeto,
                 ImporteIva = ivaParaEnviar,
                 ImporteTotal = totalParaEnviar,
@@ -410,7 +410,7 @@ public partial class Form1 : Form
                                     $"Tipo de Comprobante: {facturaRequest.TipoComprobante} ({tipoSeleccionado.Codigo})\r\n" +
                                     $"CAE: {response.Cae}\r\n" +
                                     $"Vencimiento CAE: {response.CaeVencimiento}\r\n" +
-                                    $"Condición IVA receptor: {facturaRequest.CondicionIvaReceptor ?? "N/D"}\r\n" +
+                                    $"Condición IVA receptor: {facturaRequest.CondicionIvaReceptor.ToString() ?? "N/D"}\r\n" +
                                     $"Resultado: {response.Resultado}\r\n" +
                                     (consulta.Success
                                         ? $"\r\nValidación WSFE: OK (CAE {(coincidenciaCae ? "coincide" : "NO coincide")}, Vto {(coincidenciaVto ? "coincide" : "NO coincide")})\r\n"
