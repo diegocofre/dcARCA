@@ -9,6 +9,7 @@
 
 using System;
 using System.Globalization;
+using System.Security;
 using System.Text;
 using dcArca.Core.Models;
 
@@ -113,7 +114,7 @@ public sealed class dcWsfeSoapBuilder
         sb.AppendLine($"                        <ar:DocNro>{factura.CuitReceptor}</ar:DocNro>");
         sb.AppendLine($"                        <ar:CbteDesde>{nroComprobante}</ar:CbteDesde>");
         sb.AppendLine($"                        <ar:CbteHasta>{nroComprobante}</ar:CbteHasta>");
-        sb.AppendLine($"                        <ar:CbteFch>{factura.FechaComprobante}</ar:CbteFch>");
+        sb.AppendLine($"                        <ar:CbteFch>{SecurityElement.Escape(factura.FechaComprobante)}</ar:CbteFch>");
         sb.AppendLine($"                        <ar:ImpTotal>{factura.ImporteTotal.ToString("F2", CultureInfo.InvariantCulture)}</ar:ImpTotal>");
         sb.AppendLine("                        <ar:ImpTotConc>0.00</ar:ImpTotConc>");
         sb.AppendLine($"                        <ar:ImpNeto>{factura.ImporteNeto.ToString("F2", CultureInfo.InvariantCulture)}</ar:ImpNeto>");
@@ -187,17 +188,17 @@ public sealed class dcWsfeSoapBuilder
 
         if (!string.IsNullOrWhiteSpace(factura.FechaServicioDesde))
         {
-            sb.AppendLine($"                        <ar:FchServDesde>{factura.FechaServicioDesde}</ar:FchServDesde>");
+            sb.AppendLine($"                        <ar:FchServDesde>{SecurityElement.Escape(factura.FechaServicioDesde)}</ar:FchServDesde>");
         }
 
         if (!string.IsNullOrWhiteSpace(factura.FechaServicioHasta))
         {
-            sb.AppendLine($"                        <ar:FchServHasta>{factura.FechaServicioHasta}</ar:FchServHasta>");
+            sb.AppendLine($"                        <ar:FchServHasta>{SecurityElement.Escape(factura.FechaServicioHasta)}</ar:FchServHasta>");
         }
 
         if (!string.IsNullOrWhiteSpace(factura.FechaVencimiento))
         {
-            sb.AppendLine($"                        <ar:FchVtoPago>{factura.FechaVencimiento}</ar:FchVtoPago>");
+            sb.AppendLine($"                        <ar:FchVtoPago>{SecurityElement.Escape(factura.FechaVencimiento)}</ar:FchVtoPago>");
         }
     }
 
@@ -219,11 +220,11 @@ public sealed class dcWsfeSoapBuilder
             sb.AppendLine($"                                <ar:Nro>{factura.CbteAsociadoNro.Value}</ar:Nro>");
             if (!string.IsNullOrWhiteSpace(factura.CbteAsociadoCuit))
             {
-                sb.AppendLine($"                                <ar:Cuit>{factura.CbteAsociadoCuit}</ar:Cuit>");
+                sb.AppendLine($"                                <ar:Cuit>{SecurityElement.Escape(factura.CbteAsociadoCuit)}</ar:Cuit>");
             }
             if (!string.IsNullOrWhiteSpace(factura.CbteAsociadoFecha))
             {
-                sb.AppendLine($"                                <ar:CbteFch>{factura.CbteAsociadoFecha}</ar:CbteFch>");
+                sb.AppendLine($"                                <ar:CbteFch>{SecurityElement.Escape(factura.CbteAsociadoFecha)}</ar:CbteFch>");
             }
             sb.AppendLine("                            </ar:CbteAsoc>");
             sb.AppendLine("                        </ar:CbtesAsoc>");
@@ -232,8 +233,8 @@ public sealed class dcWsfeSoapBuilder
         {
             // Alternativa: periodo asociado
             sb.AppendLine("                        <ar:PeriodoAsoc>");
-            sb.AppendLine($"                            <ar:FchDesde>{factura.PeriodoAsocDesde}</ar:FchDesde>");
-            sb.AppendLine($"                            <ar:FchHasta>{factura.PeriodoAsocHasta}</ar:FchHasta>");
+            sb.AppendLine($"                            <ar:FchDesde>{SecurityElement.Escape(factura.PeriodoAsocDesde)}</ar:FchDesde>");
+            sb.AppendLine($"                            <ar:FchHasta>{SecurityElement.Escape(factura.PeriodoAsocHasta)}</ar:FchHasta>");
             sb.AppendLine("                        </ar:PeriodoAsoc>");
         }
     }
