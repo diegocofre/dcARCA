@@ -513,19 +513,24 @@ Expected: sin resultados (ya verificado antes de escribir este plan).
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+    <!-- Usada por dcArcaAuthService para firmar el TRA (SignedCms/CmsSigner) al armar el CMS/PKCS7 del login WSAA.
+         Antes llegaba transitivamente vía System.Security.Cryptography.Xml (paquete con vulnerabilidades NU1903, removido). -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.0" />
   </ItemGroup>
 ```
 
 (se borran las 3 referencias a `System.Security.Cryptography.Xml`, `System.ServiceModel.Http` y `System.ServiceModel.Primitives`; se sube `Microsoft.Extensions.Logging.Abstractions` de `8.0.1` a `10.0.0`).
 
+> **Corrección post-ejecución:** el `grep` del Step 1 solo buscaba `ServiceModel|Cryptography.Xml|SignedXml` y no detectó que `dcArcaAuthService.cs` usa `System.Security.Cryptography.Pkcs.SignedCms/CmsSigner/ContentInfo` (namespace **Pkcs**, no **Xml**) para firmar el TRA. Ese tipo llegaba transitivamente a través del paquete `System.Security.Cryptography.Xml` que se está borrando acá. Al quitarlo, el build rompe con `CS1069` sobre esos tres tipos. El fix es agregar `System.Security.Cryptography.Pkcs` explícito (sin advisories, a diferencia de `.Xml`) — ya incluido en el bloque de arriba.
+
 - [ ] **Step 3: Restore + build limpio**
 
 ```bash
 rm -rf dcArca.Core/obj dcArca.Core/bin
-dotnet build dcArca.sln 2>&1 | tail -15
+dotnet build dcArca.Core/dcArca.Core.csproj 2>&1 | tail -15
 ```
 
-Expected: `Build succeeded`, **0 warnings NU1903** (antes había 16).
+Expected: `Build succeeded`, **0 warnings NU1903** (antes había 16). (Se compila solo `dcArca.Core`, no todo `dcArca.sln`: `dcArca.TestApp` es WinForms `net8.0-windows` y no compila en Linux — falla preexistente, no relacionada con este plan.)
 
 - [ ] **Step 4: Correr toda la suite de tests para confirmar que nada se rompió**
 
