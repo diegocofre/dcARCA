@@ -166,11 +166,11 @@ public class dcArcaAuthService
             {
                 // Intentar cargar PFX sin contraseña (leer bytes y crear certificado sin password)
                 var raw = File.ReadAllBytes(_certificatePath);
-                certificate = new X509Certificate2(raw, (string?)null, X509KeyStorageFlags.PersistKeySet);
+                certificate = X509CertificateLoader.LoadPkcs12(raw, (string?)null, X509KeyStorageFlags.PersistKeySet);
             }
             else
             {
-                certificate = new X509Certificate2(_certificatePath, _certificatePassword, X509KeyStorageFlags.PersistKeySet);
+                certificate = X509CertificateLoader.LoadPkcs12FromFile(_certificatePath, _certificatePassword, X509KeyStorageFlags.PersistKeySet);
             }
         }
         catch (System.Security.Cryptography.CryptographicException ex)
@@ -180,7 +180,7 @@ public class dcArcaAuthService
             {
                 try
                 {
-                    certificate = new X509Certificate2(_certificatePath, string.Empty, X509KeyStorageFlags.PersistKeySet);
+                    certificate = X509CertificateLoader.LoadPkcs12FromFile(_certificatePath, string.Empty, X509KeyStorageFlags.PersistKeySet);
                 }
                 catch (System.Security.Cryptography.CryptographicException)
                 {
