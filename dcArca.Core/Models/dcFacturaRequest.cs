@@ -37,27 +37,7 @@ public class dcFacturaRequest
     /// <summary>
     /// Valida que el CUIT tenga 11 dígitos y un dígito verificador correcto
     /// </summary>
-    public bool ValidarCuit()
-    {
-        string cuitStr = CuitReceptor.ToString();
-        
-        // Verificar longitud
-        if (cuitStr.Length != 11)
-            return false;
-
-        // Calcular dígito verificador
-        int[] multiplicadores = { 5, 4, 3, 2, 7, 6, 5, 4, 3, 2 };
-        int suma = 0;
-        
-        for (int i = 0; i < 10; i++)
-            suma += int.Parse(cuitStr[i].ToString()) * multiplicadores[i];
-        
-        int verificador = 11 - (suma % 11);
-        if (verificador == 11) verificador = 0;
-        if (verificador == 10) verificador = 9;
-        
-        return verificador == int.Parse(cuitStr[10].ToString());
-    }
+    public bool ValidarCuit() => dcCuitValidator.EsValido(CuitReceptor.ToString());
 
     /// <summary>
     /// Tipo de documento del receptor (80 = CUIT, 96 = DNI, etc.)
