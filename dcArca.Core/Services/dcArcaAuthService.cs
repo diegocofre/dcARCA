@@ -123,7 +123,7 @@ public class dcArcaAuthService
             {
                 _logger.LogWarning("[dcAuthService] WSAA indica que ya existe un TA válido. Reutilizando cache si está disponible.");
                 LoadTokenFromCache();
-                if (!string.IsNullOrEmpty(_token) && DateTime.Now < _tokenExpiration)
+                if (!string.IsNullOrEmpty(_token) && DateTime.UtcNow < _tokenExpiration)
                 {
                     _logger.LogInformation($"[dcAuthService] Token en cache vigente hasta {_tokenExpiration}");
                     return;
