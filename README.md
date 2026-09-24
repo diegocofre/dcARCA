@@ -1,6 +1,6 @@
 # dcARCA - Facturación Electrónica Argentina
 
-**dcARCA** es un componente .NET 8 para implementar facturación electrónica Argentina utilizando el web service **WSFEv1 de AFIP (ARCA)** y consultar el padrón oficial **ws_sr_constancia_inscripcion** (antes ws_sr_padron_a5) para validar CUIT. 
+**dcARCA** es un componente .NET 10 para implementar facturación electrónica Argentina utilizando el web service **WSFEv1 de AFIP (ARCA)** y consultar el padrón oficial **ws_sr_constancia_inscripcion** (antes ws_sr_padron_a5) para validar CUIT. 
 Esta librería NO ES un producto oficial de ARCA ni del Gobierno Argentino,sino una implementación independiente desarrollada por **Diego Cofré Sistemas**. [www.diegocofre.com.ar](http://www.diegocofre.com.ar)
 
 ## Licencia
@@ -10,7 +10,7 @@ Copyright (c) 2025 Diego Cofré Sistemas www.diegocofre.com.ar
 ## � Quick Start (5 minutos)
 
 ### 1. Requisitos previos
-- .NET 8 SDK ([Descargar](https://dotnet.microsoft.com/download/dotnet/8.0))
+- .NET 10 SDK ([Descargar](https://dotnet.microsoft.com/download/dotnet/10.0))
 - Certificado digital ARCA (.pfx)
 
 ### 2. Clonar y compilar
@@ -55,7 +55,7 @@ dotnet run --project dcArca.TestApp\dcArca.TestApp.csproj
 ## 📦 Instalación
 
 ### Requisitos del Sistema
-- **.NET 8 SDK** o superior
+- **.NET 10 SDK** o superior
 - **Windows 10/11** (para WinForms)
 - **Certificado digital ARCA** válido
 

@@ -69,7 +69,7 @@ public static class dcConfigurationHelper
         if (string.IsNullOrWhiteSpace(config.Cuit))
             throw new InvalidOperationException("El CUIT del emisor no está configurado");
 
-        if (!EsCuitValido(config.Cuit))
+        if (!dcCuitValidator.EsValido(config.Cuit))
             throw new InvalidOperationException("El CUIT del emisor debe tener 11 dígitos numéricos y un dígito verificador válido.");
 
         if (string.IsNullOrWhiteSpace(config.CertificatePath))
@@ -86,38 +86,5 @@ public static class dcConfigurationHelper
 
         if (config.PuntoVenta <= 0)
             throw new InvalidOperationException("PuntoVenta debe ser un entero mayor que 0 y estar dado de alta en AFIP.");
-    }
-
-    private static bool EsCuitValido(string? cuit)
-    {
-        if (string.IsNullOrWhiteSpace(cuit))
-        {
-            return false;
-        }
-
-        var sanitized = new string(cuit.Where(char.IsDigit).ToArray());
-        if (sanitized.Length != 11)
-        {
-            return false;
-        }
-
-        if (!long.TryParse(sanitized, out _))
-        {
-            return false;
-        }
-
-        var multiplicadores = new[] { 5, 4, 3, 2, 7, 6, 5, 4, 3, 2 };
-        var suma = 0;
-
-        for (var i = 0; i < 10; i++)
-        {
-            suma += (sanitized[i] - '0') * multiplicadores[i];
-        }
-
-        var verificador = 11 - (suma % 11);
-        if (verificador == 11) verificador = 0;
-        if (verificador == 10) verificador = 9;
-
-        return verificador == (sanitized[10] - '0');
     }
 }

@@ -93,7 +93,7 @@ public class dcWsfeClient : IdcWsfeClient, IDisposable
         catch (Exception ex)
         {
             _logger.LogError($"[dcWsfeClient] Excepción en FECompUltimoAutorizado: {ex.Message}", ex);
-            return CrearRespuestaError("FEULTIMO_ERROR", $"Error al consultar último comprobante: {ex.Message}");
+            return CrearRespuestaValidacion("FEULTIMO_ERROR", $"Error al consultar último comprobante: {ex.Message}");
         }
     }
 
@@ -125,7 +125,7 @@ public class dcWsfeClient : IdcWsfeClient, IDisposable
         catch (Exception ex)
         {
             _logger.LogError($"[dcWsfeClient] Excepción en FECompConsultar: {ex.Message}", ex);
-            var respuesta = CrearRespuestaError("FECOMP_ERROR", $"Error al consultar comprobante: {ex.Message}");
+            var respuesta = CrearRespuestaValidacion("FECOMP_ERROR", $"Error al consultar comprobante: {ex.Message}");
             respuesta.NumeroComprobante = numeroComprobante;
             return respuesta;
         }
@@ -263,7 +263,7 @@ public class dcWsfeClient : IdcWsfeClient, IDisposable
         catch (Exception ex)
         {
             _logger.LogError($"[dcWsfeClient] Excepción en FECAESolicitar: {ex.Message}", ex);
-            return CrearRespuestaError("FECAESOLICITAR_ERROR", $"Error al solicitar CAE: {ex.Message}");
+            return CrearRespuestaValidacion("FECAESOLICITAR_ERROR", $"Error al solicitar CAE: {ex.Message}");
         }
     }
 
@@ -359,18 +359,6 @@ public class dcWsfeClient : IdcWsfeClient, IDisposable
     }
 
     private static dcFacturaResponse CrearRespuestaValidacion(string codigo, string mensaje)
-    {
-        var response = new dcFacturaResponse
-        {
-            Success = false,
-            Mensaje = mensaje,
-            Codigo = codigo
-        };
-        response.Errores.Add(mensaje);
-        return response;
-    }
-
-    private static dcFacturaResponse CrearRespuestaError(string codigo, string mensaje)
     {
         var response = new dcFacturaResponse
         {
